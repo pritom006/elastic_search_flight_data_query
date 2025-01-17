@@ -1,0 +1,195 @@
+# 1. Retrieve All Documents
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+# 2. Filter by Carrier (e.g., "ES-Air")
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "term": {"Carrier": "ES-Air"}
+  }
+}
+
+# 3. Search by Origin City (e.g., "Adelaide")
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "match": {
+      "OriginCityName": "Adelaide"
+    }
+  }
+}
+
+# 4. Filter by Price Range ($200 to $400)
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "range": {
+      "AvgTicketPrice": {
+        "gte": 200,
+        "lte": 400
+      }
+    }
+  }
+}
+
+# 5. Find Long-Distance Flights (>5000 km)
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "range": {
+      "DistanceKilometers": {
+        "gt": 5000
+      }
+    }
+  }
+}
+
+# 6. Flights on a Specific Date (e.g., "2022-01-15")
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "term": {
+      "timestamp": "2025-01-06T00:00:00"    
+    }
+  }
+}
+
+# Flights within a Date Range (e.g., "2022-01-01" to "2022-01-31")
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "range": {
+      "timestamp": {
+        "gte": "2025-01-06T00:00:00",
+        "lte": "2025-02-06T00:00:00"
+      }
+    }
+  }
+}
+
+# Average Ticket Price per Carrier
+GET kibana_sample_data_flights/_search
+{
+  "size": 0,
+  "aggs": {
+    "avg_price_per_carrier": {
+      "terms": {
+        "field": "Carrier"
+      },
+      "aggs": {
+        "avg_price": {
+          "avg": {
+            "field": "AvgTicketPrice"
+          }
+        }
+      }
+    }   
+  }
+}
+
+# 9. Total Number of Flights per Destination Country
+GET kibana_sample_data_flights/_search
+{
+  "size": 0,
+  "aggs": {
+    "total_flight_per_destinition": {
+      "terms": {
+        "field": "DestCountry"
+      }
+    }
+  }
+}
+
+# 10. Sort by Ticket Price (Descending Order)
+GET kibana_sample_data_flights/_search
+{
+  "sort": [
+    {
+      "AvgTicketPrice": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+# Paginate Results (First 10 Flights with Shortest Durations)
+GET kibana_sample_data_flights/_search
+{
+  "size": 10,
+  "sort": [
+    {
+      "FlightTimeMin": {
+        "order": "asc"
+      }
+    }
+  ]
+}
+
+# Filter by Multiple Criteria (e.g., "ES-Air" flights from "Adelaide" to "Tokoname")
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"term": {"Carrier": "ES-Air"}},
+        {"match": {"OriginCityName": "Adelaide"}},
+        {"match": {"DestCityName": "Tokoname"}}
+      ]
+    }
+  }
+}
+
+# 13. Exclude Canceled Flights and Find Delays >30 Minutes
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {"term": {"Cancelled":true}}
+      ],
+      "filter": [
+        {"range": {
+          "FlightDelayMin": {"gt": 30}
+        }}
+      ]
+    }
+  }
+}
+
+#14. Flights with Weather Conditions (e.g., "Sunny")
+GET kibana_sample_data_flights/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {"match": {"OriginWeather": "Sunny"}},
+        {"match": {"DestWeather": "Sunny"}}
+      ]
+    }
+  }
+}
+
+#15. Delayed Flights Analysis (>60 Minutes, Calculate Average Delay)
+GET kibana_sample_data_flights/_search
+{
+  "size": 0,
+  "aggs": {
+    "avg_delay": {
+      "avg": {
+        "field": "FlightDelayMin"
+      }
+    }
+  },
+  "query": {
+    "range": {
+      "FlightDelayMin": {
+        "gt": 60
+      }
+    }
+  }
+}
